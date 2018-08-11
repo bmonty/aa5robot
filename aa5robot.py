@@ -11,6 +11,13 @@ slack_client = SlackClient(os.environ.get('SLACK_BOT_TOKEN'))
 RTM_READ_DELAY = 1
 MENTION_REGEX = "^<@(|[WU].+?)>(.*)"
 
+def handle_help():
+    return """I know how to do the following:
+call <callsign>\t\tGet info on a callsign.
+qrz <callsign>\t\tGet a link to a callsign on QRZ.com.
+help, ?\t\tShow this help information.
+"""
+
 def lookup_call(callsign):
     request = requests.get('https://callook.info/{}/json'.format(callsign))
     
@@ -78,6 +85,13 @@ def handle_command(command, channel):
                 reponse = 'Error processing info for call {}'.format(callsign)
         else:
             response = "Couldn't find info on call {}.".format(callsign)
+
+    if command.startswith('qrz'):
+        callsign = command.split()[1].upper()
+        response = "https://www.qrz.com/lookup/{}".format(callsign)
+
+    if command.startswith('help') or command.startswith('?'):
+        response = handle_help()
 
     # send the response back to the channel
     slack_client.rtm_send_message(channel, response or default_response)
