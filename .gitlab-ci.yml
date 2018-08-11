@@ -1,0 +1,14 @@
+stages:
+  - build
+
+variables:
+  CONTAINER_RELEASE_IMAGE: gitlab.montynet.org/bmontgom/aa5robot:latest
+
+build-image:
+  stage: build
+  script:
+    - docker build -t $CONTAINER_RELEASE_IMAGE .
+    - docker push $CONTAINER_RELEASE_IMAGE
+    - docker rmi $CONTAINER_RELEASE_IMAGE
+  tags:
+    - docker-socket
