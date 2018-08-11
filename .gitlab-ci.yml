@@ -4,6 +4,9 @@ stages:
 variables:
   CONTAINER_RELEASE_IMAGE: gitlab.montynet.org/bmontgom/aa5robot:latest
 
+before_script:
+  - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
+
 build-image:
   stage: build
   script:
