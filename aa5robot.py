@@ -63,32 +63,42 @@ def handle_command(input, channel):
     command = input.split()[0].lower()
 
     if command.startswith('call'):
-        callsign = input.split()[1]
-        print('Running lookup for callsign {}...'.format(callsign.upper()))
-        call_info = lookup_call(callsign)
-        if call_info:
-            try:
-                response = """Here's what I found for callsign {}:
+        try:
+            callsign = command.split()[1].upper()
+        except IndexError:
+            response = "You need to give me a callsign!\nCommand looks like: call <callsign>"
+        else:
+            print('Running lookup for callsign {}...'.format(callsign))
+            call_info = lookup_call(callsign)
+            if call_info:
+                try:
+                    response = """Here's what I found for callsign {}:
     Name: {}
     Address: {}, {}
     License Class: {}
     License Granted: {}
-                """.format(
-                        callsign.upper(), 
-                        call_info["name"].title(),
-                        call_info["address"]["line1"].title(),
-                        call_info["address"]["line2"].title(),
-                        call_info["current"]["operClass"].capitalize(),
-                        call_info["otherInfo"]["grantDate"]
-                    )
-            except:
-                reponse = 'Error processing info for call {}'.format(callsign)
+                    """.format(
+                            callsign, 
+                            call_info["name"].title(),
+                            call_info["address"]["line1"].title(),
+                            call_info["address"]["line2"].title(),
+                            call_info["current"]["operClass"].capitalize(),
+                            call_info["otherInfo"]["grantDate"]
+                        )
+                except:
+                    reponse = 'Error processing info for call {}'.format(callsign)
+            else:
+                response = "Couldn't find info on call {}.".format(callsign)
+
+    if command.startswith('qrz'):
+        try:
+            callsign = command.split()[1].upper()
+        except IndexError:
+            response = "You need to give me a callsign!\nCommand looks like: qrz <callsign>"
         else:
-            response = "Couldn't find info on call {}.".format(callsign)
-    elif command.startswith('qrz'):
-        callsign = command.split()[1].upper()
-        response = "https://www.qrz.com/lookup/{}".format(callsign)
-    elif command.startswith('help') or command.startswith('?'):
+            response = "https://www.qrz.com/lookup/{}".format(callsign)
+
+    if command.startswith('help') or command.startswith('?'):
         response = handle_help()
     else:
         response = "Not sure what you mean."
