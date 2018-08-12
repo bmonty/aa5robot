@@ -55,15 +55,15 @@ def parse_direct_mention(message_text):
     # the first group contains the username, the second group contains the remaining message
     return (matches.group(1), matches.group(2).strip()) if matches else (None, None)
 
-def handle_command(command, channel):
+def handle_command(input, channel):
     """
         Executes a bot command.
     """
-    default_response = "Not sure what you mean."
-
     response = None
+    command = input.split()[0].lower()
+
     if command.startswith('call'):
-        callsign = command.split()[1]
+        callsign = input.split()[1]
         print('Running lookup for callsign {}...'.format(callsign.upper()))
         call_info = lookup_call(callsign)
         if call_info:
@@ -85,17 +85,16 @@ def handle_command(command, channel):
                 reponse = 'Error processing info for call {}'.format(callsign)
         else:
             response = "Couldn't find info on call {}.".format(callsign)
-
-    if command.startswith('qrz'):
+    elif command.startswith('qrz'):
         callsign = command.split()[1].upper()
         response = "https://www.qrz.com/lookup/{}".format(callsign)
-
-    if command.startswith('help') or command.startswith('?'):
+    elif command.startswith('help') or command.startswith('?'):
         response = handle_help()
+    else:
+        response = "Not sure what you mean."
 
     # send the response back to the channel
-    slack_client.rtm_send_message(channel, response or default_response)
-    print('Command processed.')
+    slack_client.rtm_send_message(channel, response)
 
 def aa5robot():
     if slack_client.rtm_connect(with_team_state=False):
@@ -107,7 +106,6 @@ def aa5robot():
             if command:
                 handle_command(command, channel)
             time.sleep(RTM_READ_DELAY)
-
     else:
         print("Connection failed.")
 
