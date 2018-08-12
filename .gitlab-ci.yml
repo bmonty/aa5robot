@@ -1,7 +1,9 @@
 stages:
   - build
+  - deploy
 
 variables:
+  CONTAINER_TEST_IMAGE: gitlab.montynet.org/bmontgom/aa5robot:$CI_COMMIT_REF_NAME
   CONTAINER_RELEASE_IMAGE: gitlab.montynet.org/bmontgom/aa5robot:latest
 
 before_script:
@@ -10,8 +12,21 @@ before_script:
 build-image:
   stage: build
   script:
-    - docker build -t $CONTAINER_RELEASE_IMAGE .
+    - docker build -t $CONTAINER_TEST_IMAGE .
+    - docker push $CONTAINER_TEST_IMAGE
+    - docker rmi $CONTAINER_TEST_IMAGE
+  tags:
+    - docker-socket
+
+deploy-image:
+  stage: deploy
+  script:
+    - docker pull $CONTAINER_TEST_IMAGE
+    - docker tag $CONTAINER_TEST_IMAGE $CONTAINER_RELEASE_IMAGE
     - docker push $CONTAINER_RELEASE_IMAGE
+    - docker rmi $CONTAINER_TEST_IMAGE
     - docker rmi $CONTAINER_RELEASE_IMAGE
   tags:
     - docker-socket
+  only:
+    - tags
