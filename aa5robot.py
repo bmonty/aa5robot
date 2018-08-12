@@ -64,7 +64,7 @@ def handle_command(input, channel):
 
     if command.startswith('call'):
         try:
-            callsign = command.split()[1].upper()
+            callsign = input.split()[1].upper()
         except IndexError:
             response = "You need to give me a callsign!\nCommand looks like: call <callsign>"
         else:
@@ -90,15 +90,15 @@ def handle_command(input, channel):
             else:
                 response = "Couldn't find info on call {}.".format(callsign)
 
-    if command.startswith('qrz'):
+    elif command.startswith('qrz'):
         try:
-            callsign = command.split()[1].upper()
+            callsign = input.split()[1].upper()
         except IndexError:
             response = "You need to give me a callsign!\nCommand looks like: qrz <callsign>"
         else:
             response = "https://www.qrz.com/lookup/{}".format(callsign)
 
-    if command.startswith('help') or command.startswith('?'):
+    elif command.startswith('help') or command.startswith('?'):
         response = handle_help()
     else:
         response = "Not sure what you mean."
