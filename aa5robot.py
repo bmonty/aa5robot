@@ -55,6 +55,52 @@ def parse_direct_mention(message_text):
     # the first group contains the username, the second group contains the remaining message
     return (matches.group(1), matches.group(2).strip()) if matches else (None, None)
 
+def command_call(input):
+    """
+        Looks up info for the requested callsign.
+    """
+    response = None
+    
+    try:
+        callsign = input.split()[1].upper()
+    except IndexError:
+        return "You need to give me a callsign!\nCommand looks like: call <callsign>"
+    else:
+        print('Running lookup for callsign {}...'.format(callsign))
+        call_info = lookup_call(callsign)
+        if call_info:
+            try:
+                response = """Here's what I found for callsign {}:
+Name: {}
+Address: {}, {}
+License Class: {}
+License Granted: {}
+                """.format(
+                        callsign, 
+                        call_info["name"].title(),
+                        call_info["address"]["line1"].title(),
+                        call_info["address"]["line2"].title(),
+                        call_info["current"]["operClass"].capitalize(),
+                        call_info["otherInfo"]["grantDate"]
+                    )
+            except:
+                reponse = 'Error processing info for call {}'.format(callsign)
+        else:
+            response = "Couldn't find info on call {}.".format(callsign)
+        
+        return response
+
+def command_qrz(input):
+    """
+        Creates a QRZ.com link for the requested callsign.
+    """
+    try:
+        callsign = input.split()[1].upper()
+    except IndexError:
+        return "You need to give me a callsign!\nCommand looks like: qrz <callsign>"
+    else:
+        return "https://www.qrz.com/lookup/{}".format(callsign)
+
 def handle_command(input, channel):
     """
         Executes a bot command.
@@ -63,43 +109,14 @@ def handle_command(input, channel):
     command = input.split()[0].lower()
 
     if command.startswith('call'):
-        try:
-            callsign = input.split()[1].upper()
-        except IndexError:
-            response = "You need to give me a callsign!\nCommand looks like: call <callsign>"
-        else:
-            print('Running lookup for callsign {}...'.format(callsign))
-            call_info = lookup_call(callsign)
-            if call_info:
-                try:
-                    response = """Here's what I found for callsign {}:
-    Name: {}
-    Address: {}, {}
-    License Class: {}
-    License Granted: {}
-                    """.format(
-                            callsign, 
-                            call_info["name"].title(),
-                            call_info["address"]["line1"].title(),
-                            call_info["address"]["line2"].title(),
-                            call_info["current"]["operClass"].capitalize(),
-                            call_info["otherInfo"]["grantDate"]
-                        )
-                except:
-                    reponse = 'Error processing info for call {}'.format(callsign)
-            else:
-                response = "Couldn't find info on call {}.".format(callsign)
+        response = command_call(input)
 
     elif command.startswith('qrz'):
-        try:
-            callsign = input.split()[1].upper()
-        except IndexError:
-            response = "You need to give me a callsign!\nCommand looks like: qrz <callsign>"
-        else:
-            response = "https://www.qrz.com/lookup/{}".format(callsign)
+        response = command_qrz(input)
 
     elif command.startswith('help') or command.startswith('?'):
         response = handle_help()
+
     else:
         response = "Not sure what you mean."
 
