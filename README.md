@@ -1,7 +1,8 @@
 This is a simple Slack robot designed to provide info to AARO club members.
 
 The script expects the following environment variables to be set:
-SLACK_BOT_TOKEN:    Bot User OAuth Access Token from Slack's API page
+
+**SLACK_BOT_TOKEN** - Bot User OAuth Access Token from Slack's API page
 
 The robot can be run in two ways:
 1. Run the python script on the host.  You will need to install the package
