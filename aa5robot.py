@@ -33,7 +33,8 @@ def handle_help():
     return (True, """I know how to do the following:
 call <callsign>\t\tGet info on a callsign.
 qrz <callsign>\t\tGet a link to a callsign on QRZ.com.
-location <callsign>\t\tGet the last APRS location report for a callsign.  Callsign should be a SSID (i.e. KG5YOV-9)
+location <callsign>\t\tGet the last APRS location report for a callsign.
+message <callsign> <messsage>\t\tSend an APRS message to the callsign.
 website\t\t\t\tGet a link to the club's website.
 help, ?\t\t\t\tShow this help information.
 """)
