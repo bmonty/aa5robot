@@ -8,7 +8,10 @@ import urllib.parse
 import requests
 from slackclient import SlackClient
 
-slack_client = SlackClient(os.environ.get('SLACK_BOT_TOKEN'))
+APRS_FI_TOKEN = os.environ.get('APRS_FI_TOKEN')
+SLACK_BOT_TOKEN = os.environ.get('SLACK_BOT_TOKEN')
+
+slack_client = SlackClient(SLACK_BOT_TOKEN)
 
 RTM_READ_DELAY = 1
 MENTION_REGEX = "^<@(|[WU].+?)>(.*)"
@@ -17,6 +20,7 @@ def handle_help():
     return (True, """I know how to do the following:
 call <callsign>\t\tGet info on a callsign.
 qrz <callsign>\t\tGet a link to a callsign on QRZ.com.
+location <callsign>\t\tGet the last APRS location report for a callsign.  Callsign should be a SSID (i.e. KG5YOV-9)
 website\t\t\t\tGet a link to the club's website.
 help, ?\t\t\t\tShow this help information.
 """)
@@ -57,6 +61,54 @@ def parse_direct_mention(message_text):
     matches = re.search(MENTION_REGEX, message_text)
     # the first group contains the username, the second group contains the remaining message
     return (matches.group(1), matches.group(2).strip()) if matches else (None, None)
+
+def command_location(input):
+    """
+        Looks up the latest reported location in aprs.fi for a callsign.
+    """
+    response = None
+
+    try:
+        callsign = input.split()[1].upper()
+    except IndexError:
+        return (True, "You need to give me a callsign!")
+
+    request = requests.get('https://api.aprs.fi/api/get?name={}&what=loc&apikey={}&format=json'.format(callsign, APRS_FI_TOKEN))
+
+    if request.ok:
+        result = json.loads(request.content)
+        if result["result"] != "ok":
+            return (True, "Error getting data from aprs.fi.")
+        
+        print(result)
+
+        data = result["entries"][0]
+        location = "{},{}".format(data["lat"], data["lng"])
+        response = [
+            {
+                "text": "*{} APRS Location Info*".format(callsign)
+            },
+            {
+                "fallback": "Map of {}'s location.".format(callsign),
+                "title": "{}'s Last Reported Location".format(callsign),
+                "image_url": "https://maps.googleapis.com/maps/api/staticmap?center={}&zoom=9&scale=1&size=600x300&maptype=roadmap&format=png&visual_refresh=true&markers=size:mid%7Ccolor:0xff0000%7Clabel:%7C{}".format(location, location)
+            },
+            {
+                "fields": [
+                                {
+                                    "title": "Time of Report",
+                                    "value": "<!date^{}^{{date_pretty}}|error> <!date^{}^{{time_secs}}|error>".format(data["lasttime"], data["lasttime"]),
+                                    "short": True
+                                },
+                                {
+                                    "title": "Comment",
+                                    "value": "{}".format(data["comment"]),
+                                    "short": False
+                                }
+                        ]
+            }
+        ]
+        return (False, json.dumps(response))
 
 def command_call(input):
     """
@@ -152,6 +204,9 @@ def handle_command(input, channel, user):
     elif command.startswith('website'):
         method, response = command_website()
 
+    elif command.startswith('location'):
+        method, response = command_location(input)
+
     elif command.startswith('help') or command.startswith('?'):
         method, response = handle_help()
 
@@ -166,7 +221,6 @@ def handle_command(input, channel, user):
         # send a JSON response via the Web API
         slack_client.api_call(
             "chat.postMessage",
-            token=os.environ.get('SLACK_BOT_TOKEN'),
             channel=channel,
             as_user=True,
             attachments=response
