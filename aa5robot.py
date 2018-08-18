@@ -1,4 +1,5 @@
 import os
+import sys
 import time
 import re
 import json
@@ -7,14 +8,26 @@ import urllib.parse
 
 import requests
 from slackclient import SlackClient
+import aprslib
+import logging
 
+APRS_CALLSIGN = os.environ.get('APRS_CALLSIGN')
+APRS_PASSWORD = os.environ.get('APRS_PASSWORD')
 APRS_FI_TOKEN = os.environ.get('APRS_FI_TOKEN')
 SLACK_BOT_TOKEN = os.environ.get('SLACK_BOT_TOKEN')
+if os.environ.get('DEBUG'):
+    DEBUG = True
+    logging.basicConfig(level=logging.DEBUG)
+else:
+    DEBUG = False
 
-slack_client = SlackClient(SLACK_BOT_TOKEN)
-
+USER_AGENT = "aa5robot/1.0 (+https://github.com/bmonty/aa5robot)"
 RTM_READ_DELAY = 1
 MENTION_REGEX = "^<@(|[WU].+?)>(.*)"
+
+slack_client = SlackClient(SLACK_BOT_TOKEN)
+ais = aprslib.IS(APRS_CALLSIGN, passwd=APRS_PASSWORD, port=14580)
+message_id = 1
 
 def handle_help():
     return (True, """I know how to do the following:
@@ -26,7 +39,7 @@ help, ?\t\t\t\tShow this help information.
 """)
 
 def lookup_call(callsign):
-    request = requests.get('https://callook.info/{}/json'.format(callsign))
+    request = requests.get('https://callook.info/{}/json'.format(callsign), headers={'user-agent': USER_AGENT})
     
     data = None
     if request.ok:
@@ -62,6 +75,35 @@ def parse_direct_mention(message_text):
     # the first group contains the username, the second group contains the remaining message
     return (matches.group(1), matches.group(2).strip()) if matches else (None, None)
 
+def command_message(input):
+    """
+        Sends an APRS message to the given callsign.
+    """
+    if not APRS_CALLSIGN or not APRS_PASSWORD:
+        return (True, "Sorry, I can't send messages because APRS is not configured.")
+
+    inputs = input.split()
+    try:
+        callsign = inputs[1].upper()
+    except IndexError:
+        return (True, "You need to give me a callsign.")
+    
+    try:
+        message = inputs[2]
+    except IndexError:
+        return (True, "You need to give me a message to send.")
+
+    callsign = inputs[1].upper()
+    message = ' '.join(inputs[2:])
+    if len(message) > 67:
+        return (True, "Sorry that message is too long to send via APRS.")
+
+    aprs_packet = "{}>{},TCPIP::{:<9}:{}{{1".format(APRS_CALLSIGN, APRS_CALLSIGN, callsign, message)
+    print("Sending APRS packet: {}".format(aprs_packet))
+    ais.sendall(aprs_packet)
+
+    return (True, "sent!")
+
 def command_location(input):
     """
         Looks up the latest reported location in aprs.fi for a callsign.
@@ -73,41 +115,50 @@ def command_location(input):
     except IndexError:
         return (True, "You need to give me a callsign!")
 
-    request = requests.get('https://api.aprs.fi/api/get?name={}&what=loc&apikey={}&format=json'.format(callsign, APRS_FI_TOKEN))
+    request = requests.get('https://api.aprs.fi/api/get?name={}&what=loc&apikey={}&format=json'.format(callsign, APRS_FI_TOKEN), headers={'user-agent': USER_AGENT})
 
     if request.ok:
-        result = json.loads(request.content)
-        if result["result"] != "ok":
+        try:
+            result = request.json()
+        except ValueError:
             return (True, "Error getting data from aprs.fi.")
-        
-        print(result)
 
-        data = result["entries"][0]
-        location = "{},{}".format(data["lat"], data["lng"])
-        response = [
-            {
-                "text": "*{} APRS Location Info*".format(callsign)
-            },
-            {
-                "fallback": "Map of {}'s location.".format(callsign),
-                "title": "{}'s Last Reported Location".format(callsign),
-                "image_url": "https://maps.googleapis.com/maps/api/staticmap?center={}&zoom=9&scale=1&size=600x300&maptype=roadmap&format=png&visual_refresh=true&markers=size:mid%7Ccolor:0xff0000%7Clabel:%7C{}".format(location, location)
-            },
-            {
-                "fields": [
-                                {
-                                    "title": "Time of Report",
-                                    "value": "<!date^{}^{{date_pretty}}|error> <!date^{}^{{time_secs}}|error>".format(data["lasttime"], data["lasttime"]),
-                                    "short": True
-                                },
-                                {
-                                    "title": "Comment",
-                                    "value": "{}".format(data["comment"]),
-                                    "short": False
-                                }
-                        ]
-            }
-        ]
+        try:
+            if result["result"] != "ok":
+                return (True, "Error getting data from aprs.fi.")
+        except KeyError:
+            return (True, "Error parsing data from aprs.fi.")
+
+        try:
+            data = result["entries"][0]
+            location = "{},{}".format(data["lat"], data["lng"])
+            response = [
+                {
+                    "text": "*{} APRS Location Info*".format(callsign)
+                },
+                {
+                    "fallback": "Map of {}'s location.".format(callsign),
+                    "title": "Last Reported Location",
+                    "image_url": "https://maps.googleapis.com/maps/api/staticmap?center={}&zoom=9&scale=1&size=600x300&maptype=roadmap&format=png&visual_refresh=true&markers=size:mid%7Ccolor:0xff0000%7Clabel:%7C{}".format(location, location)
+                },
+                {
+                    "fields": [
+                                    {
+                                        "title": "Time of Report",
+                                        "value": "<!date^{}^{{date_pretty}}|error> <!date^{}^{{time_secs}}|error>".format(data["lasttime"], data["lasttime"]),
+                                        "short": True
+                                    },
+                                    {
+                                        "title": "Comment",
+                                        "value": "{}".format(data["comment"]),
+                                        "short": False
+                                    }
+                            ]
+                }
+            ]
+        except KeyError:
+            return (True, "Error parsing data from aprs.fi.")
+        
         return (False, json.dumps(response))
 
 def command_call(input):
@@ -207,6 +258,9 @@ def handle_command(input, channel, user):
     elif command.startswith('location'):
         method, response = command_location(input)
 
+    elif command.startswith('message'):
+        method, response = command_message(input)
+
     elif command.startswith('help') or command.startswith('?'):
         method, response = handle_help()
 
@@ -231,11 +285,20 @@ def aa5robot():
         print("AA5ROBot connected and running.")
         aa5robot_id = slack_client.api_call("auth.test")["user_id"]
 
+        # connect to APRS-IS
+        ais.connect()
+
         while slack_client.server.connected is True:
-            command, channel = parse_bot_commands(slack_client.rtm_read(), aa5robot_id)
-            if command:
-                handle_command(command, channel, aa5robot_id)
-            time.sleep(RTM_READ_DELAY)
+            try:
+                command, channel = parse_bot_commands(slack_client.rtm_read(), aa5robot_id)
+                if command:
+                    handle_command(command, channel, aa5robot_id)
+                time.sleep(RTM_READ_DELAY)
+            except KeyboardInterrupt:
+                ais.close()
+                print("AA5ROBot exiting.")
+                sys.exit()
+
     else:
         print("Connection failed.")
 
