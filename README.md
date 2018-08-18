@@ -2,7 +2,10 @@ This is a simple Slack robot designed to provide info to AARO club members.
 
 The script expects the following environment variables to be set:
 
-**SLACK_BOT_TOKEN** - Bot User OAuth Access Token from Slack's API page
+**SLACK_BOT_TOKEN** - Bot User OAuth Access Token from Slack's API page.  This token is required.
+**APRS_CALLSIGN** - The callsign to use when sending to APRS-IS
+**APRS_PASSWORD** - APRS-IS password for the value in ```APRS_CALLSIGN```
+**APRS_FI_TOKEN** - API token for accessing aprs.fi
 
 The robot can be run in two ways:
 1. Run the python script on the host.  You will need to install the package
