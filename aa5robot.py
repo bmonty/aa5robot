@@ -130,6 +130,9 @@ def command_location(input):
         except KeyError:
             return (True, "Error parsing data from aprs.fi.")
 
+        if result["found"] == 0:
+            return (True, "There is no location info for that callsign.")
+
         try:
             data = result["entries"][0]
             location = "{},{}".format(data["lat"], data["lng"])
