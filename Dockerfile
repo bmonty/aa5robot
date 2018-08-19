@@ -7,4 +7,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY aa5robot.py .
 
-CMD [ "python", "./aa5robot.py" ]
+CMD [ "python", "-u", "./aa5robot.py" ]
