@@ -1,3 +1,4 @@
 /.vscode
 /.DS_Store
 keys.sh
+__pycache__/
