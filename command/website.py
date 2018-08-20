@@ -14,5 +14,5 @@ class CommandWebsite(Command):
         self.syntax = None
         self.help = "Get a link to the club's website."
 
-    def do_command(self, callsign):
+    def do_command(self, data):
         return (MessageTypes.RTM_MESSAGE, "The club website is at https://www.aa5ro.org/")

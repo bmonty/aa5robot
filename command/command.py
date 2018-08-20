@@ -9,3 +9,6 @@ class Command:
         anything useful.
         """
         logger.warning('This command doesn\'t do anything!')
+
+    def shutdown(self):
+        pass

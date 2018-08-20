@@ -28,9 +28,11 @@ class CommandLocation(Command):
         # this user agent string is used to comply with aprs.fi usage rules
         self.user_agent = "aa5robot/1.0 (+https://github.com/bmonty/aa5robot)"
 
-    def do_command(self, ssid):
-        if ssid == '':
-            return (MessageTypes.RTM_MESSAGE, "You need to give me an SSID.")
+    def do_command(self, data):
+        try:
+            ssid = data.split()[1].upper()
+        except IndexError:
+            return (MessageTypes.RTM_MESSAGE, "You need to give me a SSID!\nCommand looks like: {}".format(self.syntax))
 
         logger.info('Making request to aprs.fi for latest location of {}.'.format(ssid))
         request = requests.get('https://api.aprs.fi/api/get?name={}&what=loc&apikey={}&format=json'.format(ssid.upper(), self.aprs_fi_token), headers={'user-agent': self.user_agent})

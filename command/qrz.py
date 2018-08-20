@@ -14,8 +14,10 @@ class CommandQrz(Command):
         self.syntax = "qrz <callsign>"
         self.help = "Get a link to the callsign's QRZ.com page."
 
-    def do_command(self, callsign):
-        if callsign == '':
+    def do_command(self, data):
+        try:
+            callsign = data.split()[1].upper()
+        except IndexError:
             return (MessageTypes.RTM_MESSAGE, "You need to give me a callsign!\nCommand looks like: {}".format(self.syntax))
 
         return (MessageTypes.RTM_MESSAGE, "https://www.qrz.com/lookup/{}".format(callsign.upper()))

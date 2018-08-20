@@ -6,6 +6,9 @@ import logging
 from enum import Enum, auto
 
 class MessageTypes(Enum):
+    """
+    Enum used to indicate the type of bot response.
+    """
     RTM_MESSAGE = auto()
     API_CALL = auto()
 
@@ -13,10 +16,12 @@ class MessageTypes(Enum):
 commands = [
     ('command.call', 'CommandCall'),
     ('command.location', 'CommandLocation'),
+    ('command.message', 'CommandMessage'),
     ('command.qrz', 'CommandQrz'),
     ('command.website', 'CommandWebsite'),
 ]
 
+# import command modules and create instances of command classes
 command_instances = []
 for module, klass in commands:
     try:

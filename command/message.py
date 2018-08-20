@@ -3,6 +3,7 @@ import logging
 
 import aprslib
 
+from . import MessageTypes
 from .command import Command
 
 logger = logging.getLogger(__name__)
@@ -13,7 +14,7 @@ class CommandMessage(Command):
     """
     def __init__(self):
         self.command = "message"
-        self.syntax = "message <callsign>"
+        self.syntax = "message <callsign> <message>"
         self.help = "Send an APRS message to the callsign."
 
         # check if APRS is configured
@@ -36,37 +37,39 @@ class CommandMessage(Command):
         # instance variable to track message IDs
         self.message_id = 1
 
-
-    def __del__(self):
+    def shutdown(self):
+        logger.info('Shutting down APRS-IS connection.')
         self.ais.close()
 
-    def do_command(self, input):
+    def do_command(self, data):
         """
             Sends an APRS message to the given callsign.
         """
-        inputs = input.split()
-
-        # check for callsign
+        split_data = data.split()
         try:
-            callsign = inputs[0].upper()
+            split_data = data.split()
+            ssid = split_data[1].upper()
         except IndexError:
-            return (Command.RTM_MESSAGE, "You need to give me a callsign.")
+            return (MessageTypes.RTM_MESSAGE, "Sorry, I need an SSID to send a message.\nType this command as '{}'.".format(self.syntax))
         
-        # check for message
-        message = ' '.join(inputs[1:])
+        try:
+            message = ' '.join(split_data[2:])
+        except IndexError:
+            return (MessageTypes.RTM_MESSAGE, "Sorry, I need a message to send to {}.\nType this command as '{}'.".format(ssid, self.syntax))
+        
         if message == '':
-            return (Command.RTM_MESSAGE, "You need to give me a message to send.")
+            return (MessageTypes.RTM_MESSAGE, "Sorry, I need a message to send to {}.\nType this command as '{}'.".format(ssid, self.syntax))
 
         # check that message length is less than 67 characters (APRS max message length)
         if len(message) > 67:
-            return (Command.RTM_MESSAGE, "Sorry that message is too long to send via APRS.")
+            return (MessageTypes.RTM_MESSAGE, "Sorry that message is too long to send via APRS.")
 
         # create APRS-IS packet
-        aprs_packet = "{}>{},TCPIP::{:<9}:{}{{{}".format(self.APRS_CALLSIGN, self.APRS_CALLSIGN, callsign, message, self.message_id)
+        aprs_packet = "{}>{},TCPIP::{:<9}:{}{{{}".format(self.APRS_CALLSIGN, self.APRS_CALLSIGN, ssid, message, self.message_id)
         
         # send packet to APRS-IS
         logger.info("Sending APRS packet: {}".format(aprs_packet))
         self.ais.sendall(aprs_packet)
         self.message_id += 1
 
-        return (Command.RTM_MESSAGE, "Sent!")
+        return (MessageTypes.RTM_MESSAGE, "Sent!")

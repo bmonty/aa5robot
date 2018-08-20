@@ -22,14 +22,15 @@ class CommandCall(Command):
 
         self.USER_AGENT = os.environ.get('USER_AGENT')
 
-    def do_command(self, input):
+    def do_command(self, data):
         """
             Looks up info for the requested callsign.
         """
-        if input == '':
+        try:
+            callsign = data.split()[1].upper()
+        except IndexError:
             return (MessageTypes.RTM_MESSAGE, "You need to give me a callsign!\nCommand looks like: {}".format(self.syntax))
         
-        callsign = input.upper()
         logger.info('Running lookup for callsign {}...'.format(callsign))
 
         call_info = self._lookup_call(callsign)
