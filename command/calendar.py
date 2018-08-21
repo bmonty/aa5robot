@@ -10,7 +10,7 @@ class CommandWebsite(Command):
     AA5RObot command to create a link to the AARO calender.
     """
     def __init__(self):
-        self.command = "website"
+        self.command = "calendar"
         self.syntax = None
         self.help = "Get a link to the club's calender."
 
