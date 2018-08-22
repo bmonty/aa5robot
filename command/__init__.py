@@ -19,6 +19,12 @@ commands = [
     ('command.message', 'CommandMessage'),
     ('command.qrz', 'CommandQrz'),
     ('command.website', 'CommandWebsite'),
+    ('command.calendar', 'CommandCalendar'),
+    ('command.dmr_lh', 'CommandDMRLh'),
+    ('command.dmr_tg', 'CommandDMRTg'),
+    ('command.dstar_lh', 'CommandDStarLh'),
+    ('command.dstar_refs', 'CommandDStarRefs'),
+    ('command.dstar_xrefs', 'CommandDStarXrefs'),
 ]
 
 # import command modules and create instances of command classes
