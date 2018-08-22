@@ -5,7 +5,7 @@ from .command import Command
 
 logger = logging.getLogger(__name__)
 
-class CommandWebsite(Command):
+class CommandDMRLh(Command):
     """
     AA5RObot command to create a link to BM's lastheard.
     """

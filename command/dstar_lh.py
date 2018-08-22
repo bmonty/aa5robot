@@ -5,7 +5,7 @@ from .command import Command
 
 logger = logging.getLogger(__name__)
 
-class CommandWebsite(Command):
+class CommandDStarLh(Command):
     """
     AA5RObot command to create a link to DStar DPlus reflector's last heard.
     """

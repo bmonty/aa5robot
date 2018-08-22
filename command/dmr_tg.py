@@ -5,12 +5,12 @@ from .command import Command
 
 logger = logging.getLogger(__name__)
 
-class CommandWebsite(Command):
+class CommandDMRTg(Command):
     """
     AA5RObot command to create a link to BM's talkgroup list.
     """
     def __init__(self):
-        self.command = "dmr_lh"
+        self.command = "dmr_tg"
         self.syntax = None
         self.help = "Get a link to the BM's DMR talkgroup list"
 

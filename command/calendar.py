@@ -5,7 +5,7 @@ from .command import Command
 
 logger = logging.getLogger(__name__)
 
-class CommandWebsite(Command):
+class CommandCalendar(Command):
     """
     AA5RObot command to create a link to the AARO calender.
     """
@@ -15,4 +15,4 @@ class CommandWebsite(Command):
         self.help = "Get a link to the club's calender."
 
     def do_command(self, data):
-        return (MessageTypes.RTM_MESSAGE, "The club website is at https://www.aa5ro.org/events")
+        return (MessageTypes.RTM_MESSAGE, "The club's calendar is at https://www.aa5ro.org/events")

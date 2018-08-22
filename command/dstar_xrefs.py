@@ -5,12 +5,12 @@ from .command import Command
 
 logger = logging.getLogger(__name__)
 
-class CommandWebsite(Command):
+class CommandDStarXrefs(Command):
     """
     AA5RObot command to create a link to DStar XReflectors.
     """
     def __init__(self):
-        self.command = "website"
+        self.command = "dstar_xrefs"
         self.syntax = None
         self.help = "Get a link to DStar XReflectors"
 
