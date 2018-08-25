@@ -11,7 +11,7 @@ class CommandCalendar(Command):
     """
     def __init__(self):
         self.command = "calendar"
-        self.syntax = None
+        self.syntax = "calendar"
         self.help = "Get a link to the club's calender."
 
     def do_command(self, data):

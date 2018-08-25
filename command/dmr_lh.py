@@ -11,7 +11,7 @@ class CommandDMRLh(Command):
     """
     def __init__(self):
         self.command = "dmr_lh"
-        self.syntax = None
+        self.syntax = "dmr_lh"
         self.help = "Get a link to the DMR BM last heard page"
 
     def do_command(self, data):

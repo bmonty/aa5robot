@@ -11,7 +11,7 @@ class CommandDMRTg(Command):
     """
     def __init__(self):
         self.command = "dmr_tg"
-        self.syntax = None
+        self.syntax = "dmr_tg"
         self.help = "Get a link to the BM's DMR talkgroup list"
 
     def do_command(self, data):
