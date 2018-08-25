@@ -11,7 +11,7 @@ class CommandDStarLh(Command):
     """
     def __init__(self):
         self.command = "dstar_lh"
-        self.syntax = None
+        self.syntax = "dstar_lh"
         self.help = "Get a link to DStar DPlus lastheard page"
 
     def do_command(self, data):

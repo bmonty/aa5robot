@@ -11,7 +11,7 @@ class CommandWebsite(Command):
     """
     def __init__(self):
         self.command = "website"
-        self.syntax = None
+        self.syntax = "website"
         self.help = "Get a link to the club's website."
 
     def do_command(self, data):

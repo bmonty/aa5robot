@@ -11,7 +11,7 @@ class CommandDStarXrefs(Command):
     """
     def __init__(self):
         self.command = "dstar_xrefs"
-        self.syntax = None
+        self.syntax = "dstar_xrefs"
         self.help = "Get a link to DStar XReflectors"
 
     def do_command(self, data):

@@ -11,7 +11,7 @@ class CommandDStarRefs(Command):
     """
     def __init__(self):
         self.command = "dstar_refs"
-        self.syntax = None
+        self.syntax = "dstar_refs"
         self.help = "Get a link to DStar DPlus reflectors."
 
     def do_command(self, data):

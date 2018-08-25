@@ -13,6 +13,8 @@ RTM_READ_DELAY = 1           # number of seconds to wait between reads of Slack 
 MAX_RECONNECT_ATTEMPTS = 5   # number of attempts to reconnect to Slack before exiting
 RECONNECT_WAIT_TIME = 5      # time to wait between reconnect attempts (seconds)
 
+logging.basicConfig(level=logging.DEBUG)
+
 logger = logging.getLogger(__name__)
 
 class AA5ROBot:
@@ -49,9 +51,9 @@ class AA5ROBot:
         logger.info('Processing events from Slack...')
         while self.slack_client.server.connected is True:
             try:
-                data, channel = self.parse_bot_commands(self.slack_client.rtm_read())
+                data, channel, user, ts = self.parse_bot_commands(self.slack_client.rtm_read())
                 if data:
-                    self.handle_command(data, channel)
+                    self.handle_command(data, channel, user, ts)
                 time.sleep(RTM_READ_DELAY)
             except KeyboardInterrupt:
                 self.shutdown()
@@ -95,11 +97,11 @@ class AA5ROBot:
                 if event["type"] == "message" and not "subtype" in event:
                     user_id, message = self.parse_direct_mention(event["text"])
                     if user_id == self.aa5robot_id:
-                        return message, event["channel"]
+                        return message, event["channel"], event["user"], event["ts"]
             except KeyError:
-                return None, None
+                return None, None, None, None
 
-        return None, None
+        return None, None, None, None
 
     def parse_direct_mention(self, message_text):
         """
@@ -110,11 +112,11 @@ class AA5ROBot:
         # the first group contains the username, the second group contains the remaining message
         return (matches.group(1), matches.group(2).strip()) if matches else (None, None)
 
-    def handle_command(self, data, channel):
+    def handle_command(self, data, channel, user, ts):
         """
             Executes a bot command.
         """
-        logger.debug('channel: {}, data: {}'.format(channel, data))
+        logger.debug('channel: {}, data: {}, user: {}, ts: {}'.format(channel, data, user, ts))
 
         # get command string
         try:
@@ -128,7 +130,7 @@ class AA5ROBot:
             return
 
         if command_str == 'help' or command_str == '?':
-            self.handle_help(channel)
+            self.handle_help(channel, ts)
             return
 
         command_strings = [i[0] for i in self.commands]
@@ -146,11 +148,23 @@ class AA5ROBot:
             self.send_message(channel, "Not sure what you mean.  Tell me 'help' for more info.")
             return
 
-    def handle_help(self, channel):
+    def handle_help(self, channel, ts):
         """
         Sends the bot's help message to Slack.
         """
-        self.send_message(channel, "Help not implemented yet!")
+        logger.info('Processing help command...')
+
+        help_text = "I support the following commands:\n"
+        for (command_str, command_obj) in self.commands:
+            help_text += "`{}` - {}\n".format(command_obj.syntax, command_obj.help)
+        
+        self.slack_client.api_call(
+            "chat.postMessage",
+            channel=channel,
+            as_user=True,
+            #thread_ts=ts,
+            text=help_text
+        )
 
     def send_message(self, channel, response):
         """
