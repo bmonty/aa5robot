@@ -13,8 +13,6 @@ RTM_READ_DELAY = 1           # number of seconds to wait between reads of Slack 
 MAX_RECONNECT_ATTEMPTS = 5   # number of attempts to reconnect to Slack before exiting
 RECONNECT_WAIT_TIME = 5      # time to wait between reconnect attempts (seconds)
 
-logging.basicConfig(level=logging.DEBUG)
-
 logger = logging.getLogger(__name__)
 
 class AA5ROBot:
