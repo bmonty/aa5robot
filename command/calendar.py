@@ -14,5 +14,5 @@ class CommandCalendar(Command):
         self.syntax = "calendar"
         self.help = "Get a link to the club's calender."
 
-    def do_command(self, data):
+    def do_command(self, data, *args):
         return (MessageTypes.RTM_MESSAGE, "The club's calendar is at https://www.aa5ro.org/events")

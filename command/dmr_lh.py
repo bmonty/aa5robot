@@ -14,5 +14,5 @@ class CommandDMRLh(Command):
         self.syntax = "dmr_lh"
         self.help = "Get a link to the DMR BM last heard page"
 
-    def do_command(self, data):
+    def do_command(self, data, *args):
         return (MessageTypes.RTM_MESSAGE, "Here's a link to the BM DMR last heard page: https://brandmeister.network/?page=lh")

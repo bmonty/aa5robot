@@ -14,5 +14,5 @@ class CommandDStarRefs(Command):
         self.syntax = "dstar_refs"
         self.help = "Get a link to DStar DPlus reflectors."
 
-    def do_command(self, data):
+    def do_command(self, data, *args):
         return (MessageTypes.RTM_MESSAGE, "Here's the DStar DPlus reflector page http://www.dstarinfo.com/reflectors.aspx")

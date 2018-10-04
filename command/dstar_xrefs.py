@@ -14,5 +14,5 @@ class CommandDStarXrefs(Command):
         self.syntax = "dstar_xrefs"
         self.help = "Get a link to DStar XReflectors"
 
-    def do_command(self, data):
+    def do_command(self, data, *args):
         return (MessageTypes.RTM_MESSAGE, "Here is the site for DStar XReflectors: http://xrefl.net/")

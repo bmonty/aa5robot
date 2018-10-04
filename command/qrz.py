@@ -14,7 +14,7 @@ class CommandQrz(Command):
         self.syntax = "qrz <callsign>"
         self.help = "Get a link to the callsign's QRZ.com page."
 
-    def do_command(self, data):
+    def do_command(self, data, *args):
         try:
             callsign = data.split()[1].upper()
         except IndexError:

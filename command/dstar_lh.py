@@ -14,5 +14,5 @@ class CommandDStarLh(Command):
         self.syntax = "dstar_lh"
         self.help = "Get a link to DStar DPlus lastheard page"
 
-    def do_command(self, data):
+    def do_command(self, data, *args):
         return (MessageTypes.RTM_MESSAGE, "Here's a link to the DStar DPlus last heard page: http://www.dstarusers.org/lastheard.php")

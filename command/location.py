@@ -28,7 +28,7 @@ class CommandLocation(Command):
         # this user agent string is used to comply with aprs.fi usage rules
         self.user_agent = "aa5robot/1.0 (+https://github.com/bmonty/aa5robot)"
 
-    def do_command(self, data):
+    def do_command(self, data, *args):
         try:
             ssid = data.split()[1].upper()
         except IndexError:

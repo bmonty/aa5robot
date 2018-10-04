@@ -22,7 +22,7 @@ class CommandCall(Command):
 
         self.USER_AGENT = os.environ.get('USER_AGENT')
 
-    def do_command(self, data):
+    def do_command(self, data, *args):
         """
             Looks up info for the requested callsign.
         """

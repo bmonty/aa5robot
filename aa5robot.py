@@ -62,7 +62,7 @@ class AA5ROBot:
             print('AA5RObot lost connection to Slack.  Attempting reconnect, try {}'.format(reconnects + 1))
             if self.slack_client.rtm_connect(with_team_state=False):
                 print("AA5ROBot reconnected to Slack.")
-                self.aa5robot_id = slack_client.api_call("auth.test")["user_id"]
+                self.aa5robot_id = self.slack_client.api_call("auth.test")["user_id"]
                 self.start()
             else:
                 reconnects += 1
@@ -134,7 +134,7 @@ class AA5ROBot:
         command_strings = [i[0] for i in self.commands]
         if command_str in command_strings:
             logger.info("Executing command '{}'.".format(command_str))
-            method, response = self.commands[command_strings.index(command_str)][1].do_command(data)
+            method, response = self.commands[command_strings.index(command_str)][1].do_command(data, self.slack_client, channel)
 
             if method == command.MessageTypes.RTM_MESSAGE:
                 self.send_message(channel, response)

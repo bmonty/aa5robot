@@ -14,5 +14,5 @@ class CommandDMRTg(Command):
         self.syntax = "dmr_tg"
         self.help = "Get a link to the BM's DMR talkgroup list"
 
-    def do_command(self, data):
+    def do_command(self, data, *args):
         return (MessageTypes.RTM_MESSAGE, "Here's a link to the BM's DMR talkgroup page: https://brandmeister.network/?page=talkgroups")
